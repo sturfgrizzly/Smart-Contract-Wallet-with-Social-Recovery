@@ -1,0 +1,33 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SocialRecoveryWallet {
+    address public owner;
+    mapping(address => bool) public guardians;
+    address public proposedOwner;
+
+    constructor(address[] memory _guardians) {
+        owner = msg.sender;
+        for (uint i = 0; i < _guardians.length; i++) {
+            guardians[_guardians[i]] = true;
+        }
+    }
+
+    function proposeNewOwner(address newOwner) public {
+        require(guardians[msg.sender], "Not a guardian");
+        proposedOwner = newOwner;
+    }
+
+    function confirmNewOwner() public {
+        require(msg.sender == proposedOwner, "Not the proposed owner");
+        owner = proposedOwner;
+        proposedOwner = address(0);
+    }
+
+    function deposit() public payable {}
+
+    function withdraw(uint amount) public {
+        require(msg.sender == owner, "Not the owner");
+        payable(owner).transfer(amount);
+    }
+}
